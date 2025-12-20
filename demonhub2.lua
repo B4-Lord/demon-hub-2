@@ -122,20 +122,22 @@ local function panel()
     p.Visible = false
 
     p.ScrollBarThickness = 6
+    p.AutomaticCanvasSize = Enum.AutomaticSize.Y
     p.CanvasSize = UDim2.new(0, 0, 0, 0)
-    p.AutomaticCanvasSize = Enum.AutomaticSize.None
     p.ScrollingDirection = Enum.ScrollingDirection.Y
     p.VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar
 
     Instance.new("UICorner", p)
 
-    -- Layout automático
+    -- Layout
     local layout = Instance.new("UIListLayout", p)
     layout.Padding = UDim.new(0, 10)
 
-    layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-        p.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 20)
-    end)
+    -- Padding interno
+    local pad = Instance.new("UIPadding", p)
+    pad.PaddingTop = UDim.new(0, 15)
+    pad.PaddingLeft = UDim.new(0, 20)
+    pad.PaddingRight = UDim.new(0, 20)
 
     return p
 end
