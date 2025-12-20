@@ -173,7 +173,8 @@ local lines = {}
 local function espToggle(text, y, callback)
     local b = Instance.new("TextButton", espPanel)
     b.Size = UDim2.new(0,260,0,45)
-    b.Position = UDim2.new(0,20,0,y)
+    b.Size = UDim2.new(1, -40, 0, 45)
+b.LayoutOrder = y
     b.Font = Enum.Font.GothamBold
     b.TextSize = 16
     b.TextColor3 = Color3.new(1,1,1)
@@ -376,7 +377,8 @@ local function getRootPart() return getChar():WaitForChild("HumanoidRootPart") e
 local function createPlayerButton(parent, text, y)
     local b = Instance.new("TextButton", parent)
     b.Size = UDim2.new(0,260,0,40)
-    b.Position = UDim2.new(0,20,0,y)
+    b.Size = UDim2.new(1, -40, 0, 45)
+b.LayoutOrder = y
     b.Font = Enum.Font.GothamBold
     b.TextSize = 16
     b.TextColor3 = Color3.new(1,1,1)
@@ -594,7 +596,6 @@ end)
 --==================================================
 local function createPlayerList(panel, textBox)
     local listFrame = Instance.new("ScrollingFrame", panel)
-listFrame.LayoutOrder = 3
     listFrame.Size = UDim2.new(0,260,0,150)
     listFrame.Position = UDim2.new(0,20,0,130)
     listFrame.CanvasSize = UDim2.new(0,0,0,0)
@@ -689,7 +690,7 @@ Instance.new("UICorner", otherBox)
 
 local spectateBtn = Instance.new("TextButton", othersPanel)
 spectateBtn.LayoutOrder = 2
-listFrame.LayoutOrder = 3
+
 
 spectateBtn.Size = UDim2.new(0,260,0,45)
 spectateBtn.Position = UDim2.new(0,20,0,75)
