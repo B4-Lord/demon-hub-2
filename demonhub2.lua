@@ -23,6 +23,7 @@ local BTN_ACTIVE = Color3.fromRGB(70,70,70)
 -- GUI BASE
 --==================================================
 local gui = Instance.new("ScreenGui")
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Name = "HubUI"
 gui.ResetOnSpawn = false
 gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
@@ -53,24 +54,26 @@ end
 -- HUB
 --==================================================
 local main = Instance.new("Frame", gui)
-main.Size = UDim2.new(0,500,0,300)
-main.Position = UDim2.new(0.5,-250,0.4,0)
+main.Size = UDim2.new(0,500,0,350)
+main.Position = UDim2.new(0.5,-250,0.5,-150)
 main.BackgroundColor3 = Color3.fromRGB(18,18,18)
-main.Visible = false
+main.Visible = true
 main.Active = true
 main.Draggable = true
+main.ZIndex = 10
 Instance.new("UICorner", main)
 
---==================================================
--- TOPO
---==================================================
 local top = Instance.new("Frame", main)
 top.Size = UDim2.new(1,0,0,40)
 top.BackgroundColor3 = Color3.fromRGB(25,25,25)
+top.ZIndex = 11
+--==================================================
+-- TOPO
+--==================================================
 
 local title = Instance.new("TextLabel", top)
 title.Size = UDim2.new(1,0,1,0)
-title.Text = "B4 + RICK"
+title.Text = "Demon Hub"
 title.Font = Enum.Font.GothamBold
 title.TextSize = 20
 title.TextColor3 = Color3.new(1,1,1)
@@ -109,15 +112,31 @@ local othersBtn = sideButton("OTHERS",200)
 local buttons = {espBtn, playerBtn, tpBtn, aboutBtn, othersBtn}
 
 --==================================================
--- PAINÉIS
+-- PAINÉIS (COM SCROLL AUTOMÁTICO)
 --==================================================
 local function panel()
-    local p = Instance.new("Frame", content)
-    p.Size = UDim2.new(1,-150,1,0)
-    p.Position = UDim2.new(0,150,0,0)
-    p.BackgroundColor3 = Color3.fromRGB(22,22,22)
+    local p = Instance.new("ScrollingFrame", content)
+    p.Size = UDim2.new(1, -150, 1, 0)
+    p.Position = UDim2.new(0, 150, 0, 0)
+    p.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
     p.Visible = false
+
+    p.ScrollBarThickness = 6
+    p.CanvasSize = UDim2.new(0, 0, 0, 0)
+    p.AutomaticCanvasSize = Enum.AutomaticSize.None
+    p.ScrollingDirection = Enum.ScrollingDirection.Y
+    p.VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar
+
     Instance.new("UICorner", p)
+
+    -- Layout automático
+    local layout = Instance.new("UIListLayout", p)
+    layout.Padding = UDim.new(0, 10)
+
+    layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        p.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 20)
+    end)
+
     return p
 end
 
@@ -336,11 +355,6 @@ end)
 -- PLAYER PANEL COMPLETO (GODMODE + NOCLIP + SPEED + SUPERJUMP + FLY)
 --==================================================
 
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local UIS = game:GetService("UserInputService")
-local LocalPlayer = Players.LocalPlayer
-
 -- Configurações iniciais
 local GOD_ON, NOCLIP_ON, isFlying = false, false, false
 local speedValue = 16
@@ -423,93 +437,91 @@ local function stopFly()
     end
     updatePlayerTexts()
 end
+--==================================================
+-- CRIAÇÃO DE SLIDERS (ALINHADOS + SCROLL)
+--==================================================
+local function createSlider(name, minVal, maxVal, initial, callback)
+    local holder = Instance.new("Frame", playerPanel)
+    holder.Size = UDim2.new(1, -40, 0, 70)
+    holder.BackgroundTransparency = 1
 
---==================================================
--- CRIAÇÃO DE SLIDERS
---==================================================
-local function createSlider(name, defaultY, minVal, maxVal, initial, callback)
-    -- Label
-    local label = Instance.new("TextLabel", playerPanel)
-    label.Size = UDim2.new(0,260,0,20)
-    label.Position = UDim2.new(0,20,0,defaultY)
+    local label = Instance.new("TextLabel", holder)
+    label.Size = UDim2.new(1, -70, 0, 20)
     label.BackgroundTransparency = 1
     label.TextColor3 = Color3.new(1,1,1)
     label.Font = Enum.Font.Gotham
     label.TextSize = 14
     label.Text = name..": "..initial
 
-    -- Frame slider
-    local sliderFrame = Instance.new("Frame", playerPanel)
-    sliderFrame.Size = UDim2.new(0,260,0,20)
-    sliderFrame.Position = UDim2.new(0,20,0,defaultY+20)
-    sliderFrame.BackgroundColor3 = Color3.fromRGB(50,50,50)
-    Instance.new("UICorner", sliderFrame)
-
-    -- Fill
-    local fill = Instance.new("Frame", sliderFrame)
-    fill.Size = UDim2.new((initial-minVal)/(maxVal-minVal),0,1,0)
-    fill.BackgroundColor3 = Color3.fromRGB(100,200,255)
-    Instance.new("UICorner", fill)
-
-    -- TextBox para digitar valor
-    local box = Instance.new("TextBox", playerPanel)
-    box.Size = UDim2.new(0,60,0,20)
-    box.Position = UDim2.new(0,220,0,defaultY)
+    local box = Instance.new("TextBox", holder)
+    box.Size = UDim2.new(0, 60, 0, 20)
+    box.Position = UDim2.new(1, -60, 0, 0)
     box.Text = tostring(initial)
-    box.TextColor3 = Color3.new(1,1,1)
-    box.BackgroundColor3 = Color3.fromRGB(35,35,35)
+    box.ClearTextOnFocus = false
     box.Font = Enum.Font.Gotham
     box.TextSize = 14
-    box.ClearTextOnFocus = false
+    box.TextColor3 = Color3.new(1,1,1)
+    box.BackgroundColor3 = Color3.fromRGB(35,35,35)
     Instance.new("UICorner", box)
 
-    -- Atualiza slider
-    local function updateSlider(value)
-        value = math.clamp(value, minVal, maxVal)
-        fill.Size = UDim2.new((value-minVal)/(maxVal-minVal),0,1,0)
-        label.Text = name..": "..math.floor(value)
-        box.Text = tostring(math.floor(value))
-        callback(value)
+    local bar = Instance.new("Frame", holder)
+    bar.Size = UDim2.new(1, 0, 0, 18)
+    bar.Position = UDim2.new(0, 0, 0, 30)
+    bar.BackgroundColor3 = Color3.fromRGB(50,50,50)
+    Instance.new("UICorner", bar)
+
+    local fill = Instance.new("Frame", bar)
+    fill.BackgroundColor3 = Color3.fromRGB(90,160,255)
+    fill.Size = UDim2.new((initial-minVal)/(maxVal-minVal), 0, 1, 0)
+    Instance.new("UICorner", fill)
+
+    local function update(val)
+        val = math.clamp(val, minVal, maxVal)
+        fill.Size = UDim2.new((val-minVal)/(maxVal-minVal),0,1,0)
+        label.Text = name..": "..math.floor(val)
+        box.Text = tostring(math.floor(val))
+        callback(val)
     end
 
-    -- Arrastar slider
     local dragging = false
-    sliderFrame.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = true; main.Draggable = false end
+    bar.InputBegan:Connect(function(i)
+        if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging = true end
     end)
-    sliderFrame.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false; main.Draggable = true end
+    bar.InputEnded:Connect(function(i)
+        if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
     end)
-    UIS.InputChanged:Connect(function(input)
-        if dragging and input.UserInputType==Enum.UserInputType.MouseMovement then
-            local mouseX = UIS:GetMouseLocation().X - sliderFrame.AbsolutePosition.X
-            local percent = math.clamp(mouseX/sliderFrame.AbsoluteSize.X,0,1)
-            local val = minVal + percent*(maxVal-minVal)
-            updateSlider(val)
+    UIS.InputChanged:Connect(function(i)
+        if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
+            local percent = math.clamp(
+                (UIS:GetMouseLocation().X - bar.AbsolutePosition.X) / bar.AbsoluteSize.X,
+                0, 1
+            )
+            update(minVal + percent * (maxVal - minVal))
         end
     end)
 
-    -- Digitar valor
     box.FocusLost:Connect(function()
-        local val = tonumber(box.Text)
-        if val then updateSlider(val) end
+        local v = tonumber(box.Text)
+        if v then update(v) end
     end)
 
-    return updateSlider
+    update(initial)
 end
 
--- Criar sliders
-local updateSpeed = createSlider("SPEED", 170, 16, 500, speedValue, function(val)
-    speedValue = val
-    getHumanoid().WalkSpeed = speedValue
+createSlider("SPEED", 16, 200, speedValue, function(v)
+    speedValue = v
+    getHumanoid().WalkSpeed = v
 end)
-local updateJump = createSlider("SUPERJUMP", 220, 50, 500, superJumpPower, function(val)
-    superJumpPower = val
-    getHumanoid().JumpPower = superJumpPower
+
+createSlider("SUPERJUMP", 50, 200, superJumpPower, function(v)
+    superJumpPower = v
+    getHumanoid().JumpPower = v
 end)
-local updateFly = createSlider("FLY SPEED", 270, 10, 500, flySpeed, function(val)
-    flySpeed = val
+
+createSlider("FLY SPEED", 10, 500, flySpeed, function(v)
+    flySpeed = v
 end)
+
 
 --==================================================
 -- CONTROLE DO FLY / NOCLIP
@@ -580,6 +592,7 @@ end)
 --==================================================
 local function createPlayerList(panel, textBox)
     local listFrame = Instance.new("ScrollingFrame", panel)
+listFrame.LayoutOrder = 3
     listFrame.Size = UDim2.new(0,260,0,150)
     listFrame.Position = UDim2.new(0,20,0,130)
     listFrame.CanvasSize = UDim2.new(0,0,0,0)
@@ -627,6 +640,7 @@ end
 -- TELEPORT
 local tpBox = Instance.new("TextBox", tpPanel)
 tpBox.Size = UDim2.new(0,260,0,45)
+tpBox.LayoutOrder = 1
 tpBox.Position = UDim2.new(0,20,0,20)
 tpBox.PlaceholderText = "Nome do player"
 tpBox.Font = Enum.Font.Gotham
@@ -638,6 +652,7 @@ Instance.new("UICorner", tpBox)
 local tpGo = Instance.new("TextButton", tpPanel)
 tpGo.Size = UDim2.new(0,260,0,45)
 tpGo.Position = UDim2.new(0,20,0,75)
+tpGo.LayoutOrder = 2
 tpGo.Text = "TELEPORTAR"
 tpGo.Font = Enum.Font.GothamBold
 tpGo.TextSize = 16
@@ -659,6 +674,8 @@ createPlayerList(tpPanel, tpBox)
 
 -- OTHERS (Spectate)
 local otherBox = Instance.new("TextBox", othersPanel)
+otherBox.LayoutOrder = 1
+
 otherBox.Size = UDim2.new(0,260,0,45)
 otherBox.Position = UDim2.new(0,20,0,20)
 otherBox.PlaceholderText = "Nome do player"
@@ -669,6 +686,9 @@ otherBox.TextColor3 = Color3.new(1,1,1)
 Instance.new("UICorner", otherBox)
 
 local spectateBtn = Instance.new("TextButton", othersPanel)
+spectateBtn.LayoutOrder = 2
+listFrame.LayoutOrder = 3
+
 spectateBtn.Size = UDim2.new(0,260,0,45)
 spectateBtn.Position = UDim2.new(0,20,0,75)
 spectateBtn.Text = "ESPECTAR"
