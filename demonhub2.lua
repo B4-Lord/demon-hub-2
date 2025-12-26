@@ -1,13 +1,10 @@
---================================================== 
+--==================================================
 -- SERVIÇOS
 --==================================================
-
 repeat task.wait() until game:IsLoaded()
-
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
-
 local LocalPlayer = Players.LocalPlayer
 repeat task.wait() until LocalPlayer
 repeat task.wait() until LocalPlayer:FindFirstChild("PlayerGui")
@@ -51,7 +48,7 @@ local function notifyMsg(text)
 end
 
 --==================================================
--- HUB
+-- HUB PRINCIPAL
 --==================================================
 local main = Instance.new("Frame", gui)
 main.Size = UDim2.new(0,500,0,350)
@@ -67,9 +64,6 @@ local top = Instance.new("Frame", main)
 top.Size = UDim2.new(1,0,0,40)
 top.BackgroundColor3 = Color3.fromRGB(25,25,25)
 top.ZIndex = 11
---==================================================
--- TOPO
---==================================================
 
 local title = Instance.new("TextLabel", top)
 title.Size = UDim2.new(1,0,1,0)
@@ -79,9 +73,6 @@ title.TextSize = 20
 title.TextColor3 = Color3.new(1,1,1)
 title.BackgroundTransparency = 1
 
---==================================================
--- CONTEÚDO
---==================================================
 local content = Instance.new("Frame", main)
 content.Size = UDim2.new(1,-20,1,-55)
 content.Position = UDim2.new(0,10,0,45)
@@ -90,7 +81,7 @@ content.BackgroundTransparency = 1
 --==================================================
 -- MENU LATERAL
 --==================================================
-local function sideButton(text,y)
+local function sideButton(text, y)
     local b = Instance.new("TextButton", content)
     b.Size = UDim2.new(0,130,0,40)
     b.Position = UDim2.new(0,0,0,y)
@@ -108,7 +99,6 @@ local playerBtn = sideButton("PLAYER",50)
 local tpBtn = sideButton("TELEPORT",100)
 local aboutBtn = sideButton("ABOUT",150)
 local othersBtn = sideButton("OTHERS",200)
-
 local buttons = {espBtn, playerBtn, tpBtn, aboutBtn, othersBtn}
 
 --==================================================
@@ -120,25 +110,20 @@ local function panel()
     p.Position = UDim2.new(0, 150, 0, 0)
     p.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
     p.Visible = false
-
     p.ScrollBarThickness = 6
     p.AutomaticCanvasSize = Enum.AutomaticSize.Y
     p.CanvasSize = UDim2.new(0, 0, 0, 0)
     p.ScrollingDirection = Enum.ScrollingDirection.Y
     p.VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar
-
     Instance.new("UICorner", p)
-
     -- Layout
     local layout = Instance.new("UIListLayout", p)
     layout.Padding = UDim.new(0, 10)
-
     -- Padding interno
     local pad = Instance.new("UIPadding", p)
     pad.PaddingTop = UDim.new(0, 15)
     pad.PaddingLeft = UDim.new(0, 20)
     pad.PaddingRight = UDim.new(0, 20)
-
     return p
 end
 
@@ -165,6 +150,50 @@ local function showPanel(panelToShow, activeBtn)
 end
 
 --==================================================
+-- LISTA DE PLAYERS CLICÁVEL (DEFINIDA ANTES DE SER USADA)
+--==================================================
+local function createPlayerList(panel, textBox)
+    local listFrame = Instance.new("ScrollingFrame", panel)
+    listFrame.Size = UDim2.new(0,260,0,150)
+    listFrame.Position = UDim2.new(0,20,0,300)  -- Ajustado para caber abaixo dos botões
+    listFrame.CanvasSize = UDim2.new(0,0,0,0)
+    listFrame.ScrollBarThickness = 6
+    listFrame.BackgroundColor3 = Color3.fromRGB(50,50,50)
+    Instance.new("UICorner", listFrame)
+    
+    local listLayout = Instance.new("UIListLayout", listFrame)
+    listLayout.Padding = UDim.new(0,5)
+    
+    local function refreshList()
+        for _, child in pairs(listFrame:GetChildren()) do
+            if child:IsA("TextButton") then child:Destroy() end
+        end
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p ~= LocalPlayer then
+                local btn = Instance.new("TextButton", listFrame)
+                btn.Size = UDim2.new(1,0,0,30)
+                btn.Text = p.Name
+                btn.Font = Enum.Font.Gotham
+                btn.TextSize = 14
+                btn.TextColor3 = Color3.new(1,1,1)
+                btn.BackgroundColor3 = Color3.fromRGB(70,70,70)
+                Instance.new("UICorner", btn)
+                
+                btn.MouseButton1Click:Connect(function()
+                    textBox.Text = p.Name
+                    notifyMsg("Selecionado: "..p.Name)
+                end)
+            end
+        end
+        listFrame.CanvasSize = UDim2.new(0,0,0,listLayout.AbsoluteContentSize.Y + 5)
+    end
+    
+    Players.PlayerAdded:Connect(refreshList)
+    Players.PlayerRemoving:Connect(refreshList)
+    refreshList()
+end
+
+--==================================================
 -- ESP PLAYERS
 --==================================================
 local ESP_ON, ESP_NAME, ESP_DISTANCE, ESP_LINE = false, true, false, false
@@ -172,9 +201,8 @@ local lines = {}
 
 local function espToggle(text, y, callback)
     local b = Instance.new("TextButton", espPanel)
-    b.Size = UDim2.new(0,260,0,45)
     b.Size = UDim2.new(1, -40, 0, 45)
-b.LayoutOrder = y
+    b.LayoutOrder = y
     b.Font = Enum.Font.GothamBold
     b.TextSize = 16
     b.TextColor3 = Color3.new(1,1,1)
@@ -293,7 +321,7 @@ RunService.RenderStepped:Connect(function()
 end)
 
 --==================================================
--- ESP MOEDAS (LEVEMENTE)
+-- ESP MOEDAS
 --==================================================
 local tokenBtn = Instance.new("TextButton", espPanel)
 tokenBtn.Size = UDim2.new(0,260,0,45)
@@ -340,7 +368,6 @@ tokenBtn.MouseButton1Click:Connect(function()
     ESP_TOKEN_ON = not ESP_TOKEN_ON
     tokenBtn.Text = "ESP MOEDAS : "..(ESP_TOKEN_ON and "ON" or "OFF")
     notifyMsg("ESP MOEDAS "..(ESP_TOKEN_ON and "ON" or "OFF"))
-
     if ESP_TOKEN_ON then
         for _, token in ipairs(workspace:GetDescendants()) do
             if token:IsA("BasePart") and token.Name:match("Coin") then
@@ -357,7 +384,6 @@ end)
 --==================================================
 -- PLAYER PANEL COMPLETO (GODMODE + NOCLIP + SPEED + SUPERJUMP + FLY)
 --==================================================
-
 -- Configurações iniciais
 local GOD_ON, NOCLIP_ON, isFlying = false, false, false
 local speedValue = 16
@@ -365,20 +391,17 @@ local superJumpPower = 50
 local flySpeed = 50
 local FlyControl = {Forward=0, Backward=0, Left=0, Right=0, Up=0, Down=0}
 local bodyVelocity = nil
-
 -- Funções utilitárias
 local function getChar() return LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait() end
 local function getHumanoid() return getChar():WaitForChild("Humanoid") end
 local function getRootPart() return getChar():WaitForChild("HumanoidRootPart") end
-
 --==================================================
 -- CRIAÇÃO DE BOTÕES
 --==================================================
 local function createPlayerButton(parent, text, y)
     local b = Instance.new("TextButton", parent)
-    b.Size = UDim2.new(0,260,0,40)
     b.Size = UDim2.new(1, -40, 0, 45)
-b.LayoutOrder = y
+    b.LayoutOrder = y
     b.Font = Enum.Font.GothamBold
     b.TextSize = 16
     b.TextColor3 = Color3.new(1,1,1)
@@ -387,11 +410,9 @@ b.LayoutOrder = y
     b.Text = text
     return b
 end
-
 local godBtn = createPlayerButton(playerPanel, "GODMODE : OFF", 10)
 local noclipBtn = createPlayerButton(playerPanel, "NOCLIP : OFF", 60)
 local flyBtn = createPlayerButton(playerPanel, "FLY : OFF", 110)
-
 --==================================================
 -- ATUALIZA TEXTOS DOS BOTÕES
 --==================================================
@@ -401,11 +422,9 @@ local function updatePlayerTexts()
     flyBtn.Text = "FLY : "..(isFlying and "ON" or "OFF")
 end
 updatePlayerTexts()
-
 --==================================================
 -- FUNÇÕES
 --==================================================
-
 -- GODMODE
 local function applyGod()
     local hum = getHumanoid()
@@ -415,14 +434,12 @@ local function applyGod()
         if GOD_ON then hum.Health = hum.MaxHealth end
     end)
 end
-
 -- NOCLIP
 local function toggleNoclip()
     NOCLIP_ON = not NOCLIP_ON
     updatePlayerTexts()
     notifyMsg("NOCLIP "..(NOCLIP_ON and "ON" or "OFF"))
 end
-
 -- FLY
 local function startFly()
     if isFlying then return end
@@ -448,7 +465,7 @@ local function createSlider(name, minVal, maxVal, initial, callback)
     local holder = Instance.new("Frame", playerPanel)
     holder.Size = UDim2.new(1, -40, 0, 70)
     holder.BackgroundTransparency = 1
-
+    holder.LayoutOrder = playerPanel:FindFirstChild("UIListLayout").AbsoluteContentSize.Y / 10 + 1  -- Ajuste dinâmico
     local label = Instance.new("TextLabel", holder)
     label.Size = UDim2.new(1, -70, 0, 20)
     label.BackgroundTransparency = 1
@@ -456,7 +473,6 @@ local function createSlider(name, minVal, maxVal, initial, callback)
     label.Font = Enum.Font.Gotham
     label.TextSize = 14
     label.Text = name..": "..initial
-
     local box = Instance.new("TextBox", holder)
     box.Size = UDim2.new(0, 60, 0, 20)
     box.Position = UDim2.new(1, -60, 0, 0)
@@ -467,18 +483,15 @@ local function createSlider(name, minVal, maxVal, initial, callback)
     box.TextColor3 = Color3.new(1,1,1)
     box.BackgroundColor3 = Color3.fromRGB(35,35,35)
     Instance.new("UICorner", box)
-
     local bar = Instance.new("Frame", holder)
     bar.Size = UDim2.new(1, 0, 0, 18)
     bar.Position = UDim2.new(0, 0, 0, 30)
     bar.BackgroundColor3 = Color3.fromRGB(50,50,50)
     Instance.new("UICorner", bar)
-
     local fill = Instance.new("Frame", bar)
     fill.BackgroundColor3 = Color3.fromRGB(90,160,255)
     fill.Size = UDim2.new((initial-minVal)/(maxVal-minVal), 0, 1, 0)
     Instance.new("UICorner", fill)
-
     local function update(val)
         val = math.clamp(val, minVal, maxVal)
         fill.Size = UDim2.new((val-minVal)/(maxVal-minVal),0,1,0)
@@ -486,7 +499,6 @@ local function createSlider(name, minVal, maxVal, initial, callback)
         box.Text = tostring(math.floor(val))
         callback(val)
     end
-
     local dragging = false
     bar.InputBegan:Connect(function(i)
         if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging = true end
@@ -503,45 +515,41 @@ local function createSlider(name, minVal, maxVal, initial, callback)
             update(minVal + percent * (maxVal - minVal))
         end
     end)
-
     box.FocusLost:Connect(function()
         local v = tonumber(box.Text)
         if v then update(v) end
     end)
-
     update(initial)
+    return holder
 end
 
 createSlider("SPEED", 16, 200, speedValue, function(v)
     speedValue = v
     getHumanoid().WalkSpeed = v
 end)
-
 createSlider("SUPERJUMP", 50, 200, superJumpPower, function(v)
     superJumpPower = v
     getHumanoid().JumpPower = v
 end)
-
 createSlider("FLY SPEED", 10, 500, flySpeed, function(v)
     flySpeed = v
 end)
-
 
 --==================================================
 -- CONTROLE DO FLY / NOCLIP
 --==================================================
 RunService.RenderStepped:Connect(function()
     -- Noclip
-if NOCLIP_ON then
-    local char = LocalPlayer.Character
-    if char then
-        for _,v in ipairs(char:GetDescendants()) do
-            if v:IsA("BasePart") then
-                v.CanCollide = false
+    if NOCLIP_ON then
+        local char = LocalPlayer.Character
+        if char then
+            for _,v in ipairs(char:GetDescendants()) do
+                if v:IsA("BasePart") then
+                    v.CanCollide = false
+                end
             end
         end
     end
-end
     -- Fly
     if isFlying and bodyVelocity then
         local camCFrame = workspace.CurrentCamera.CFrame
@@ -562,6 +570,7 @@ UIS.InputBegan:Connect(function(input,gp)
     if input.KeyCode==Enum.KeyCode.Space then FlyControl.Up=1 end
     if input.KeyCode==Enum.KeyCode.LeftShift then FlyControl.Down=1 end
 end)
+
 UIS.InputEnded:Connect(function(input)
     if input.KeyCode==Enum.KeyCode.W then FlyControl.Forward=0 end
     if input.KeyCode==Enum.KeyCode.S then FlyControl.Backward=0 end
@@ -580,7 +589,9 @@ godBtn.MouseButton1Click:Connect(function()
     if GOD_ON then applyGod() end
     notifyMsg("GODMODE "..(GOD_ON and "ON" or "OFF"))
 end)
+
 noclipBtn.MouseButton1Click:Connect(toggleNoclip)
+
 flyBtn.MouseButton1Click:Connect(function()
     if isFlying then stopFly() else startFly() end
     notifyMsg("FLY "..(isFlying and "ON" or "OFF"))
@@ -592,55 +603,163 @@ LocalPlayer.CharacterAdded:Connect(function(char)
 end)
 
 --==================================================
--- TELEPORT + OTHERS COM LISTA CLICÁVEL
+-- VARIÁVEIS GLOBAIS PARA GRUDAR (COSTAS / COLO)
 --==================================================
-local function createPlayerList(panel, textBox)
-    local listFrame = Instance.new("ScrollingFrame", panel)
-    listFrame.Size = UDim2.new(0,260,0,150)
-    listFrame.Position = UDim2.new(0,20,0,130)
-    listFrame.CanvasSize = UDim2.new(0,0,0,0)
-    listFrame.ScrollBarThickness = 6
-    listFrame.BackgroundColor3 = Color3.fromRGB(50,50,50)
-    Instance.new("UICorner", listFrame)
+local alignPos, alignOri = nil, nil
+local attach0, attach1 = nil, nil
+local sitTrack = nil
+local lastCFrame = nil
+local currentTargetName = nil
+local currentMode = nil -- "back" ou "lap"
+local watchingChar = nil
 
-    local listLayout = Instance.new("UIListLayout", listFrame)
-    listLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    listLayout.Padding = UDim.new(0,5)
-
-    local function refreshList()
-        for _, child in pairs(listFrame:GetChildren()) do
-            if child:IsA("TextButton") then
-                child:Destroy()
-            end
-        end
-
-        for _,p in ipairs(Players:GetPlayers()) do
-            if p ~= LocalPlayer then
-                local btn = Instance.new("TextButton")
-                btn.Size = UDim2.new(1,0,0,30)
-                btn.Text = p.Name
-                btn.Font = Enum.Font.Gotham
-                btn.TextSize = 14
-                btn.TextColor3 = Color3.new(1,1,1)
-                btn.BackgroundColor3 = Color3.fromRGB(70,70,70)
-                Instance.new("UICorner", btn)
-                btn.Parent = listFrame
-                btn.MouseButton1Click:Connect(function()
-                    textBox.Text = p.Name
-                    notifyMsg("Selecionado: "..p.Name)
-                end)
-            end
-        end
-
-        listFrame.CanvasSize = UDim2.new(0,0,0,listLayout.AbsoluteContentSize.Y + 5)
-    end
-
-    Players.PlayerAdded:Connect(refreshList)
-    Players.PlayerRemoving:Connect(refreshList)
-    refreshList()
+--==================================================
+-- FUNÇÕES UTIL
+--==================================================
+local function getChar(plr)
+    return plr.Character or plr.CharacterAdded:Wait()
 end
 
--- TELEPORT
+local function setNoCollide(char, state)
+    for _, v in ipairs(char:GetDescendants()) do
+        if v:IsA("BasePart") then
+            v.CanCollide = not state
+        end
+    end
+end
+
+local function playSitAnimation(humanoid)
+    if sitTrack then sitTrack:Stop() end
+    local anim = Instance.new("Animation")
+    anim.AnimationId = "rbxassetid://2506281703"
+    sitTrack = humanoid:LoadAnimation(anim)
+    sitTrack:Play()
+end
+
+--==================================================
+-- LIMPAR GRUDE
+--==================================================
+local function cleanupAttach(restorePos)
+    if alignPos then alignPos:Destroy() alignPos = nil end
+    if alignOri then alignOri:Destroy() alignOri = nil end
+    if attach0 then attach0:Destroy() attach0 = nil end
+    if attach1 then attach1:Destroy() attach1 = nil end
+
+    local char = getChar(LocalPlayer)
+    local hum = char:FindFirstChild("Humanoid")
+    local root = char:FindFirstChild("HumanoidRootPart")
+
+    if hum then
+        hum.Sit = false
+        if sitTrack then
+            sitTrack:Stop()
+            sitTrack = nil
+        end
+    end
+
+    setNoCollide(char, false)
+
+    if restorePos and root and lastCFrame then
+        root.CFrame = lastCFrame
+    end
+
+    currentTargetName = nil
+    currentMode = nil
+    if watchingChar then watchingChar:Disconnect() watchingChar = nil end
+end
+
+--==================================================
+-- INICIAR GRUDE (COSTAS OU COLO)
+--==================================================
+local function startAttach(playerName, mode) -- mode = "back" ou "lap"
+    local target = Players:FindFirstChild(playerName)
+    if not target or target == LocalPlayer then
+        notifyMsg("Jogador inválido")
+        return
+    end
+
+    cleanupAttach(false) -- limpa qualquer grude anterior
+
+    currentTargetName = playerName
+    currentMode = mode
+
+    local myChar = getChar(LocalPlayer)
+    local targetChar = getChar(target)
+
+    local myRoot = myChar:WaitForChild("HumanoidRootPart")
+    local targetRoot = targetChar:WaitForChild("HumanoidRootPart")
+    local hum = myChar:WaitForChild("Humanoid")
+
+    lastCFrame = myRoot.CFrame
+
+    -- Configuração por mode
+    local offsetPos, offsetOri
+    if mode == "back" then
+        -- Costas: atrás do alvo, olhando para frente dele
+        offsetPos = Vector3.new(0, 0, 1.6)
+        offsetOri = Vector3.new(0, 180, 0)
+    else -- "lap" (colo/mochila)
+        -- Colo: na frente do alvo, olhando na mesma direção
+        offsetPos = Vector3.new(0, 0, -1.6)
+        offsetOri = Vector3.new(0, 0, 0)
+    end
+
+    -- Teleport inicial
+    setNoCollide(myChar, true)
+    myRoot.CFrame = targetRoot.CFrame * CFrame.new(offsetPos) * CFrame.Angles(0, math.rad(offsetOri.Y), 0)
+    task.wait(0.05)
+
+    -- Attachments
+    attach0 = Instance.new("Attachment", myRoot)
+    attach1 = Instance.new("Attachment", targetRoot)
+    attach1.Position = offsetPos
+    attach0.Orientation = offsetOri
+
+    -- AlignPosition
+    alignPos = Instance.new("AlignPosition", myRoot)
+    alignPos.Attachment0 = attach0
+    alignPos.Attachment1 = attach1
+    alignPos.RigidityEnabled = true
+    alignPos.MaxForce = 100000
+    alignPos.Responsiveness = 200
+
+    -- AlignOrientation
+    alignOri = Instance.new("AlignOrientation", myRoot)
+    alignOri.Attachment0 = attach0
+    alignOri.Attachment1 = attach1
+    alignOri.RigidityEnabled = true
+    alignOri.MaxTorque = 100000
+    alignOri.Responsiveness = 200
+
+    -- Sentar + animação
+    hum.Sit = true
+    playSitAnimation(hum)
+
+    -- Regruda se o alvo resetar
+    if watchingChar then watchingChar:Disconnect() end
+    watchingChar = target.CharacterAdded:Connect(function()
+        task.wait(0.2)
+        if currentTargetName and currentMode then
+            startAttach(currentTargetName, currentMode)
+        end
+    end)
+
+    notifyMsg("Grudado em "..playerName.." ("..(mode == "back" and "Costas" or "Colo")..")")
+end
+
+--==================================================
+-- SE O ALVO SAIR DO JOGO → VOLTA POSIÇÃO
+--==================================================
+Players.PlayerRemoving:Connect(function(plr)
+    if plr.Name == currentTargetName then
+        cleanupAttach(true)
+        notifyMsg("Alvo saiu → voltou à posição anterior")
+    end
+end)
+
+--==================================================
+-- TELEPORT PANEL (MODIFICADO)
+--==================================================
 local tpBox = Instance.new("TextBox", tpPanel)
 tpBox.Size = UDim2.new(0,260,0,45)
 tpBox.LayoutOrder = 1
@@ -652,33 +771,94 @@ tpBox.BackgroundColor3 = Color3.fromRGB(40,40,40)
 tpBox.TextColor3 = Color3.new(1,1,1)
 Instance.new("UICorner", tpBox)
 
+-- Botão Teleport normal (frente)
 local tpGo = Instance.new("TextButton", tpPanel)
 tpGo.Size = UDim2.new(0,260,0,45)
 tpGo.Position = UDim2.new(0,20,0,75)
 tpGo.LayoutOrder = 2
-tpGo.Text = "TELEPORTAR"
+tpGo.Text = "TELEPORTAR (FRENTE)"
 tpGo.Font = Enum.Font.GothamBold
 tpGo.TextSize = 16
 tpGo.TextColor3 = Color3.new(1,1,1)
 tpGo.BackgroundColor3 = Color3.fromRGB(70,120,255)
 Instance.new("UICorner", tpGo)
 
+-- Botão Grudar Costas
+local backBtn = Instance.new("TextButton", tpPanel)
+backBtn.Size = UDim2.new(0,260,0,45)
+backBtn.Position = UDim2.new(0,20,0,130)
+backBtn.LayoutOrder = 3
+backBtn.Text = "GRUDAR NAS COSTAS"
+backBtn.Font = Enum.Font.GothamBold
+backBtn.TextSize = 16
+backBtn.TextColor3 = Color3.new(1,1,1)
+backBtn.BackgroundColor3 = Color3.fromRGB(255,100,100)
+Instance.new("UICorner", backBtn)
+
+-- Botão Grudar Colo
+local lapBtn = Instance.new("TextButton", tpPanel)
+lapBtn.Size = UDim2.new(0,260,0,45)
+lapBtn.Position = UDim2.new(0,20,0,185)
+lapBtn.LayoutOrder = 4
+lapBtn.Text = "GRUDAR NO COLO"
+lapBtn.Font = Enum.Font.GothamBold
+lapBtn.TextSize = 16
+lapBtn.TextColor3 = Color3.new(1,1,1)
+lapBtn.BackgroundColor3 = Color3.fromRGB(100,200,255)
+Instance.new("UICorner", lapBtn)
+
+-- Botão Desgrudar
+local stopBtn = Instance.new("TextButton", tpPanel)
+stopBtn.Size = UDim2.new(0,260,0,45)
+stopBtn.Position = UDim2.new(0,20,0,240)
+stopBtn.LayoutOrder = 5
+stopBtn.Text = "DESGRUDAR"
+stopBtn.Font = Enum.Font.GothamBold
+stopBtn.TextSize = 16
+stopBtn.TextColor3 = Color3.new(1,1,1)
+stopBtn.BackgroundColor3 = Color3.fromRGB(200,50,50)
+Instance.new("UICorner", stopBtn)
+
+-- Lista de players (clicável)
+createPlayerList(tpPanel, tpBox)
+
+-- Ações dos botões
 tpGo.MouseButton1Click:Connect(function()
     local t = Players:FindFirstChild(tpBox.Text)
     if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
         LocalPlayer.Character.HumanoidRootPart.CFrame = t.Character.HumanoidRootPart.CFrame * CFrame.new(0,0,-3)
-        notifyMsg("TELEPORT OK")
+        notifyMsg("Teleportado para "..t.Name)
     else
-        notifyMsg("PLAYER NÃO ENCONTRADO")
+        notifyMsg("Player não encontrado")
     end
 end)
 
-createPlayerList(tpPanel, tpBox)
+backBtn.MouseButton1Click:Connect(function()
+    if tpBox.Text ~= "" then
+        startAttach(tpBox.Text, "back")
+    else
+        notifyMsg("Digite o nome do player")
+    end
+end)
 
+lapBtn.MouseButton1Click:Connect(function()
+    if tpBox.Text ~= "" then
+        startAttach(tpBox.Text, "lap")
+    else
+        notifyMsg("Digite o nome do player")
+    end
+end)
+
+stopBtn.MouseButton1Click:Connect(function()
+    cleanupAttach(false)
+    notifyMsg("Desgrudado")
+end)
+
+--==================================================
 -- OTHERS (Spectate)
+--==================================================
 local otherBox = Instance.new("TextBox", othersPanel)
 otherBox.LayoutOrder = 1
-
 otherBox.Size = UDim2.new(0,260,0,45)
 otherBox.Position = UDim2.new(0,20,0,20)
 otherBox.PlaceholderText = "Nome do player"
@@ -690,8 +870,6 @@ Instance.new("UICorner", otherBox)
 
 local spectateBtn = Instance.new("TextButton", othersPanel)
 spectateBtn.LayoutOrder = 2
-
-
 spectateBtn.Size = UDim2.new(0,260,0,45)
 spectateBtn.Position = UDim2.new(0,20,0,75)
 spectateBtn.Text = "ESPECTAR"
@@ -794,7 +972,6 @@ playerBtn.MouseButton1Click:Connect(function() showPanel(playerPanel, playerBtn)
 tpBtn.MouseButton1Click:Connect(function() showPanel(tpPanel, tpBtn) end)
 aboutBtn.MouseButton1Click:Connect(function() showPanel(aboutPanel, aboutBtn) end)
 othersBtn.MouseButton1Click:Connect(function() showPanel(othersPanel, othersBtn) end)
-
 showPanel(espPanel, espBtn)
 
 --==================================================
