@@ -150,12 +150,12 @@ local function showPanel(panelToShow, activeBtn)
 end
 
 --==================================================
--- LISTA DE PLAYERS CLICÁVEL (DEFINIDA ANTES DE SER USADA)
+-- LISTA DE PLAYERS CLICÁVEL
 --==================================================
 local function createPlayerList(panel, textBox)
     local listFrame = Instance.new("ScrollingFrame", panel)
     listFrame.Size = UDim2.new(0,260,0,150)
-    listFrame.Position = UDim2.new(0,20,0,300)  -- Ajustado para caber abaixo dos botões
+    listFrame.Position = UDim2.new(0,20,0,300)
     listFrame.CanvasSize = UDim2.new(0,0,0,0)
     listFrame.ScrollBarThickness = 6
     listFrame.BackgroundColor3 = Color3.fromRGB(50,50,50)
@@ -382,21 +382,49 @@ tokenBtn.MouseButton1Click:Connect(function()
 end)
 
 --==================================================
--- PLAYER PANEL COMPLETO (GODMODE + NOCLIP + SPEED + SUPERJUMP + FLY)
+-- PLAYER PANEL COMPLETO (GODMODE + NOCLIP + VAMPIRE FLY + SPEED + SUPERJUMP)
 --==================================================
--- Configurações iniciais
 local GOD_ON, NOCLIP_ON, isFlying = false, false, false
 local speedValue = 16
 local superJumpPower = 50
 local flySpeed = 50
 local FlyControl = {Forward=0, Backward=0, Left=0, Right=0, Up=0, Down=0}
 local bodyVelocity = nil
--- Funções utilitárias
+
+-- ANIMAÇÃO VAMPIRE FLY (IDLE DO PACOTE VAMPIRE)
+local vampireFlyAnimId = "rbxassetid://1083445855" -- Idle 1 do Vampire Animation Pack
+local vampireFlyAnimTrack = nil
+
 local function getChar() return LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait() end
 local function getHumanoid() return getChar():WaitForChild("Humanoid") end
 local function getRootPart() return getChar():WaitForChild("HumanoidRootPart") end
+
+-- FUNÇÕES ANIMAÇÃO VAMPIRE FLY
+local function playVampireFly()
+    local hum = getHumanoid()
+    if vampireFlyAnimTrack then
+        vampireFlyAnimTrack:Stop()
+        vampireFlyAnimTrack:Destroy()
+        vampireFlyAnimTrack = nil
+    end
+    local anim = Instance.new("Animation")
+    anim.AnimationId = vampireFlyAnimId
+    vampireFlyAnimTrack = hum:LoadAnimation(anim)
+    vampireFlyAnimTrack.Priority = Enum.AnimationPriority.Action
+    vampireFlyAnimTrack.Looped = true
+    vampireFlyAnimTrack:Play()
+end
+
+local function stopVampireFly()
+    if vampireFlyAnimTrack then
+        vampireFlyAnimTrack:Stop()
+        vampireFlyAnimTrack:Destroy()
+        vampireFlyAnimTrack = nil
+    end
+end
+
 --==================================================
--- CRIAÇÃO DE BOTÕES
+-- CRIAÇÃO DE BOTÕES PLAYER
 --==================================================
 local function createPlayerButton(parent, text, y)
     local b = Instance.new("TextButton", parent)
@@ -410,22 +438,24 @@ local function createPlayerButton(parent, text, y)
     b.Text = text
     return b
 end
+
 local godBtn = createPlayerButton(playerPanel, "GODMODE : OFF", 10)
 local noclipBtn = createPlayerButton(playerPanel, "NOCLIP : OFF", 60)
-local flyBtn = createPlayerButton(playerPanel, "FLY : OFF", 110)
+local flyBtn = createPlayerButton(playerPanel, "VAMPIRE FLY : OFF", 110)
+
 --==================================================
 -- ATUALIZA TEXTOS DOS BOTÕES
 --==================================================
 local function updatePlayerTexts()
     godBtn.Text = "GODMODE : "..(GOD_ON and "ON" or "OFF")
     noclipBtn.Text = "NOCLIP : "..(NOCLIP_ON and "ON" or "OFF")
-    flyBtn.Text = "FLY : "..(isFlying and "ON" or "OFF")
+    flyBtn.Text = "VAMPIRE FLY : "..(isFlying and "ON" or "OFF")
 end
 updatePlayerTexts()
+
 --==================================================
--- FUNÇÕES
+-- FUNÇÕES PLAYER
 --==================================================
--- GODMODE
 local function applyGod()
     local hum = getHumanoid()
     hum.MaxHealth = math.huge
@@ -434,38 +464,49 @@ local function applyGod()
         if GOD_ON then hum.Health = hum.MaxHealth end
     end)
 end
--- NOCLIP
+
 local function toggleNoclip()
     NOCLIP_ON = not NOCLIP_ON
     updatePlayerTexts()
     notifyMsg("NOCLIP "..(NOCLIP_ON and "ON" or "OFF"))
 end
--- FLY
+
 local function startFly()
     if isFlying then return end
     isFlying = true
+
     bodyVelocity = Instance.new("BodyVelocity")
     bodyVelocity.MaxForce = Vector3.new(1e5,1e5,1e5)
     bodyVelocity.Velocity = Vector3.new(0,0,0)
     bodyVelocity.Parent = getRootPart()
+
+    -- Toca animação Vampire ao voar
+    playVampireFly()
+
     updatePlayerTexts()
+    notifyMsg("VAMPIRE FLY ON")
 end
+
 local function stopFly()
     isFlying = false
     if bodyVelocity then
         bodyVelocity:Destroy()
         bodyVelocity = nil
     end
+    -- Para animação Vampire
+    stopVampireFly()
     updatePlayerTexts()
+    notifyMsg("VAMPIRE FLY OFF")
 end
+
 --==================================================
--- CRIAÇÃO DE SLIDERS (ALINHADOS + SCROLL)
+-- SLIDERS
 --==================================================
 local function createSlider(name, minVal, maxVal, initial, callback)
     local holder = Instance.new("Frame", playerPanel)
     holder.Size = UDim2.new(1, -40, 0, 70)
     holder.BackgroundTransparency = 1
-    holder.LayoutOrder = playerPanel:FindFirstChild("UIListLayout").AbsoluteContentSize.Y / 10 + 1  -- Ajuste dinâmico
+    holder.LayoutOrder = 200 -- Ajuste para sliders ficarem no final
     local label = Instance.new("TextLabel", holder)
     label.Size = UDim2.new(1, -70, 0, 20)
     label.BackgroundTransparency = 1
@@ -536,7 +577,7 @@ createSlider("FLY SPEED", 10, 500, flySpeed, function(v)
 end)
 
 --==================================================
--- CONTROLE DO FLY / NOCLIP
+-- CONTROLE FLY / NOCLIP / VAMPIRE ANIMATION
 --==================================================
 RunService.RenderStepped:Connect(function()
     -- Noclip
@@ -550,7 +591,7 @@ RunService.RenderStepped:Connect(function()
             end
         end
     end
-    -- Fly
+    -- Vampire Fly
     if isFlying and bodyVelocity then
         local camCFrame = workspace.CurrentCamera.CFrame
         local move = (camCFrame.LookVector*(FlyControl.Forward-FlyControl.Backward) +
@@ -561,6 +602,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
+-- CONTROLES TECLA FLY (WASD + Space/Shift)
 UIS.InputBegan:Connect(function(input,gp)
     if gp then return end
     if input.KeyCode==Enum.KeyCode.W then FlyControl.Forward=1 end
@@ -581,7 +623,7 @@ UIS.InputEnded:Connect(function(input)
 end)
 
 --==================================================
--- CONEXÕES DOS BOTÕES
+-- CONEXÕES BOTÕES PLAYER
 --==================================================
 godBtn.MouseButton1Click:Connect(function()
     GOD_ON = not GOD_ON
@@ -593,28 +635,41 @@ end)
 noclipBtn.MouseButton1Click:Connect(toggleNoclip)
 
 flyBtn.MouseButton1Click:Connect(function()
-    if isFlying then stopFly() else startFly() end
-    notifyMsg("FLY "..(isFlying and "ON" or "OFF"))
+    if isFlying then
+        stopFly()
+    else
+        startFly()
+    end
 end)
 
--- GODMODE NO SPAWN
+-- GODMODE + FLY NO RESPAWN
 LocalPlayer.CharacterAdded:Connect(function(char)
+    char:WaitForChild("Humanoid")
+    char:WaitForChild("HumanoidRootPart")
     if GOD_ON then applyGod() end
+    if isFlying then
+        task.wait(0.2)
+        bodyVelocity = Instance.new("BodyVelocity")
+        bodyVelocity.MaxForce = Vector3.new(1e5,1e5,1e5)
+        bodyVelocity.Velocity = Vector3.new(0,0,0)
+        bodyVelocity.Parent = getRootPart()
+        playVampireFly()
+    end
 end)
 
 --==================================================
--- VARIÁVEIS GLOBAIS PARA GRUDAR (COSTAS / COLO)
+-- VARIÁVEIS GRUDAR
 --==================================================
 local alignPos, alignOri = nil, nil
 local attach0, attach1 = nil, nil
 local sitTrack = nil
 local lastCFrame = nil
 local currentTargetName = nil
-local currentMode = nil -- "back" ou "lap"
+local currentMode = nil
 local watchingChar = nil
 
 --==================================================
--- FUNÇÕES UTIL
+-- FUNÇÕES GRUDAR
 --==================================================
 local function getChar(plr)
     return plr.Character or plr.CharacterAdded:Wait()
@@ -636,9 +691,6 @@ local function playSitAnimation(humanoid)
     sitTrack:Play()
 end
 
---==================================================
--- LIMPAR GRUDE
---==================================================
 local function cleanupAttach(restorePos)
     if alignPos then alignPos:Destroy() alignPos = nil end
     if alignOri then alignOri:Destroy() alignOri = nil end
@@ -668,17 +720,14 @@ local function cleanupAttach(restorePos)
     if watchingChar then watchingChar:Disconnect() watchingChar = nil end
 end
 
---==================================================
--- INICIAR GRUDE (COSTAS OU COLO)
---==================================================
-local function startAttach(playerName, mode) -- mode = "back" ou "lap"
+local function startAttach(playerName, mode)
     local target = Players:FindFirstChild(playerName)
     if not target or target == LocalPlayer then
         notifyMsg("Jogador inválido")
         return
     end
 
-    cleanupAttach(false) -- limpa qualquer grude anterior
+    cleanupAttach(false)
 
     currentTargetName = playerName
     currentMode = mode
@@ -692,30 +741,24 @@ local function startAttach(playerName, mode) -- mode = "back" ou "lap"
 
     lastCFrame = myRoot.CFrame
 
-    -- Configuração por mode
     local offsetPos, offsetOri
     if mode == "back" then
-        -- Costas: atrás do alvo, olhando para frente dele
         offsetPos = Vector3.new(0, 0, 1.6)
         offsetOri = Vector3.new(0, 180, 0)
-    else -- "lap" (colo/mochila)
-        -- Colo: na frente do alvo, olhando na mesma direção
+    else
         offsetPos = Vector3.new(0, 0, -1.6)
         offsetOri = Vector3.new(0, 0, 0)
     end
 
-    -- Teleport inicial
     setNoCollide(myChar, true)
     myRoot.CFrame = targetRoot.CFrame * CFrame.new(offsetPos) * CFrame.Angles(0, math.rad(offsetOri.Y), 0)
     task.wait(0.05)
 
-    -- Attachments
     attach0 = Instance.new("Attachment", myRoot)
     attach1 = Instance.new("Attachment", targetRoot)
     attach1.Position = offsetPos
     attach0.Orientation = offsetOri
 
-    -- AlignPosition
     alignPos = Instance.new("AlignPosition", myRoot)
     alignPos.Attachment0 = attach0
     alignPos.Attachment1 = attach1
@@ -723,7 +766,6 @@ local function startAttach(playerName, mode) -- mode = "back" ou "lap"
     alignPos.MaxForce = 100000
     alignPos.Responsiveness = 200
 
-    -- AlignOrientation
     alignOri = Instance.new("AlignOrientation", myRoot)
     alignOri.Attachment0 = attach0
     alignOri.Attachment1 = attach1
@@ -731,11 +773,9 @@ local function startAttach(playerName, mode) -- mode = "back" ou "lap"
     alignOri.MaxTorque = 100000
     alignOri.Responsiveness = 200
 
-    -- Sentar + animação
     hum.Sit = true
     playSitAnimation(hum)
 
-    -- Regruda se o alvo resetar
     if watchingChar then watchingChar:Disconnect() end
     watchingChar = target.CharacterAdded:Connect(function()
         task.wait(0.2)
@@ -747,9 +787,6 @@ local function startAttach(playerName, mode) -- mode = "back" ou "lap"
     notifyMsg("Grudado em "..playerName.." ("..(mode == "back" and "Costas" or "Colo")..")")
 end
 
---==================================================
--- SE O ALVO SAIR DO JOGO → VOLTA POSIÇÃO
---==================================================
 Players.PlayerRemoving:Connect(function(plr)
     if plr.Name == currentTargetName then
         cleanupAttach(true)
@@ -758,7 +795,7 @@ Players.PlayerRemoving:Connect(function(plr)
 end)
 
 --==================================================
--- TELEPORT PANEL (MODIFICADO)
+-- TELEPORT PANEL
 --==================================================
 local tpBox = Instance.new("TextBox", tpPanel)
 tpBox.Size = UDim2.new(0,260,0,45)
@@ -771,7 +808,6 @@ tpBox.BackgroundColor3 = Color3.fromRGB(40,40,40)
 tpBox.TextColor3 = Color3.new(1,1,1)
 Instance.new("UICorner", tpBox)
 
--- Botão Teleport normal (frente)
 local tpGo = Instance.new("TextButton", tpPanel)
 tpGo.Size = UDim2.new(0,260,0,45)
 tpGo.Position = UDim2.new(0,20,0,75)
@@ -783,7 +819,6 @@ tpGo.TextColor3 = Color3.new(1,1,1)
 tpGo.BackgroundColor3 = Color3.fromRGB(70,120,255)
 Instance.new("UICorner", tpGo)
 
--- Botão Grudar Costas
 local backBtn = Instance.new("TextButton", tpPanel)
 backBtn.Size = UDim2.new(0,260,0,45)
 backBtn.Position = UDim2.new(0,20,0,130)
@@ -795,7 +830,6 @@ backBtn.TextColor3 = Color3.new(1,1,1)
 backBtn.BackgroundColor3 = Color3.fromRGB(255,100,100)
 Instance.new("UICorner", backBtn)
 
--- Botão Grudar Colo
 local lapBtn = Instance.new("TextButton", tpPanel)
 lapBtn.Size = UDim2.new(0,260,0,45)
 lapBtn.Position = UDim2.new(0,20,0,185)
@@ -807,7 +841,6 @@ lapBtn.TextColor3 = Color3.new(1,1,1)
 lapBtn.BackgroundColor3 = Color3.fromRGB(100,200,255)
 Instance.new("UICorner", lapBtn)
 
--- Botão Desgrudar
 local stopBtn = Instance.new("TextButton", tpPanel)
 stopBtn.Size = UDim2.new(0,260,0,45)
 stopBtn.Position = UDim2.new(0,20,0,240)
@@ -819,10 +852,8 @@ stopBtn.TextColor3 = Color3.new(1,1,1)
 stopBtn.BackgroundColor3 = Color3.fromRGB(200,50,50)
 Instance.new("UICorner", stopBtn)
 
--- Lista de players (clicável)
 createPlayerList(tpPanel, tpBox)
 
--- Ações dos botões
 tpGo.MouseButton1Click:Connect(function()
     local t = Players:FindFirstChild(tpBox.Text)
     if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
@@ -855,7 +886,7 @@ stopBtn.MouseButton1Click:Connect(function()
 end)
 
 --==================================================
--- OTHERS (Spectate)
+-- OTHERS (SPECTATE)
 --==================================================
 local otherBox = Instance.new("TextBox", othersPanel)
 otherBox.LayoutOrder = 1
@@ -936,7 +967,7 @@ creators.TextYAlignment = Enum.TextYAlignment.Top
 creators.Font = Enum.Font.Gotham
 creators.TextSize = 15
 creators.TextColor3 = Color3.new(1,1,1)
-creators.Text = "CRIADORES:\n• B4_LORD\n• SZ RICK"
+creators.Text = "CRIADORES:\n• B4_LORD\n• SZ RICK\n\n• VAMPIRE FLY ADDED"
 
 local donateBtn = Instance.new("TextButton", aboutPanel)
 donateBtn.Size = UDim2.new(0,260,0,45)
@@ -965,7 +996,7 @@ donateBtn.MouseButton1Click:Connect(function()
 end)
 
 --==================================================
--- CONTROLES DOS BOTÕES LATERAIS
+-- CONTROLES BOTÕES LATERAIS
 --==================================================
 espBtn.MouseButton1Click:Connect(function() showPanel(espPanel, espBtn) end)
 playerBtn.MouseButton1Click:Connect(function() showPanel(playerPanel, playerBtn) end)
@@ -975,7 +1006,7 @@ othersBtn.MouseButton1Click:Connect(function() showPanel(othersPanel, othersBtn)
 showPanel(espPanel, espBtn)
 
 --==================================================
--- TECLA Z (ABRIR HUB)
+-- TECLA Z (ABRIR/FECHAR HUB)
 --==================================================
 UIS.InputBegan:Connect(function(i,gp)
     if gp then return end
