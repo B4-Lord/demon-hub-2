@@ -669,7 +669,7 @@ local currentMode = nil
 local watchingChar = nil
 
 --==================================================
--- FUNÇÕES GRUDAR
+-- FUNÇÕES GRUDAR (CORRIGIDO - COLO FICA DE FRENTE)
 --==================================================
 local function getChar(plr)
     return plr.Character or plr.CharacterAdded:Wait()
@@ -745,9 +745,9 @@ local function startAttach(playerName, mode)
     if mode == "back" then
         offsetPos = Vector3.new(0, 0, 1.6)
         offsetOri = Vector3.new(0, 180, 0)
-    else
+    else -- MODO "LAP" (COLO) - CORRIGIDO PARA FICAR DE FRENTE
         offsetPos = Vector3.new(0, 0, -1.6)
-        offsetOri = Vector3.new(0, 0, 0)
+        offsetOri = Vector3.new(0, 180, 0) -- 180 graus = FICA DE FRENTE
     end
 
     setNoCollide(myChar, true)
@@ -998,7 +998,7 @@ creators.TextYAlignment = Enum.TextYAlignment.Top
 creators.Font = Enum.Font.Gotham
 creators.TextSize = 15
 creators.TextColor3 = Color3.new(1,1,1)
-creators.Text = "CRIADORES:\n• B4_LORD\n• SZ RICK\n\n• VAMPIRE FLY ADDED\n• EMOTES LIBERADOS"
+creators.Text = "CRIADORES:\n• B4_LORD\n• SZ RICK\n\n• VAMPIRE FLY ADDED\n• EMOTES LIBERADOS\n• COLO CORRIGIDO ✓"
 
 local donateBtn = Instance.new("TextButton", aboutPanel)
 donateBtn.Size = UDim2.new(0,260,0,45)
