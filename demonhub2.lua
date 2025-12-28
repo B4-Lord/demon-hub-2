@@ -886,7 +886,7 @@ stopBtn.MouseButton1Click:Connect(function()
 end)
 
 --==================================================
--- OTHERS (SPECTATE)
+-- OTHERS (SPECTATE + LIBERAR EMOTES)
 --==================================================
 local otherBox = Instance.new("TextBox", othersPanel)
 otherBox.LayoutOrder = 1
@@ -909,6 +909,18 @@ spectateBtn.TextSize = 16
 spectateBtn.TextColor3 = Color3.new(1,1,1)
 spectateBtn.BackgroundColor3 = Color3.fromRGB(70,120,255)
 Instance.new("UICorner", spectateBtn)
+
+-- BOTÃO LIBERAR EMOTES
+local emotesBtn = Instance.new("TextButton", othersPanel)
+emotesBtn.LayoutOrder = 3
+emotesBtn.Size = UDim2.new(0,260,0,45)
+emotesBtn.Position = UDim2.new(0,20,0,130)
+emotesBtn.Text = "LIBERAR EMOTES"
+emotesBtn.Font = Enum.Font.GothamBold
+emotesBtn.TextSize = 16
+emotesBtn.TextColor3 = Color3.new(1,1,1)
+emotesBtn.BackgroundColor3 = Color3.fromRGB(100,200,100)
+Instance.new("UICorner", emotesBtn)
 
 local isSpectating = false
 local targetPlayer = nil
@@ -933,6 +945,25 @@ spectateBtn.MouseButton1Click:Connect(function()
         cam.CameraType = originalCameraType
         cam.CameraSubject = originalCameraSubject
         notifyMsg("ESPECTAR DESATIVADO")
+    end
+end)
+
+-- FUNCIONALIDADE LIBERAR EMOTES
+emotesBtn.MouseButton1Click:Connect(function()
+    local success, err = pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/7yd7/Hub/refs/heads/Branch/GUIS/Emotes.lua"))()
+    end)
+    
+    if success then
+        notifyMsg("✅ EMOTES LIBERADOS!")
+        emotesBtn.Text = "EMOTES ✓"
+        emotesBtn.BackgroundColor3 = Color3.fromRGB(120,220,120)
+        task.wait(2)
+        emotesBtn.Text = "LIBERAR EMOTES"
+        emotesBtn.BackgroundColor3 = Color3.fromRGB(100,200,100)
+    else
+        notifyMsg("❌ ERRO AO CARREGAR EMOTES")
+        warn("Erro emotes:", err)
     end
 end)
 
@@ -967,7 +998,7 @@ creators.TextYAlignment = Enum.TextYAlignment.Top
 creators.Font = Enum.Font.Gotham
 creators.TextSize = 15
 creators.TextColor3 = Color3.new(1,1,1)
-creators.Text = "CRIADORES:\n• B4_LORD\n• SZ RICK\n\n• VAMPIRE FLY ADDED"
+creators.Text = "CRIADORES:\n• B4_LORD\n• SZ RICK\n\n• VAMPIRE FLY ADDED\n• EMOTES LIBERADOS"
 
 local donateBtn = Instance.new("TextButton", aboutPanel)
 donateBtn.Size = UDim2.new(0,260,0,45)
