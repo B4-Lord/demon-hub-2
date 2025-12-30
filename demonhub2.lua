@@ -9,13 +9,11 @@ local LocalPlayer = Players.LocalPlayer
 repeat task.wait() until LocalPlayer
 repeat task.wait() until LocalPlayer:FindFirstChild("PlayerGui")
 repeat task.wait() until LocalPlayer.Character
-
 --==================================================
 -- CORES
 --==================================================
 local BTN_NORMAL = Color3.fromRGB(35,35,35)
 local BTN_ACTIVE = Color3.fromRGB(70,70,70)
-
 --==================================================
 -- GUI BASE
 --==================================================
@@ -24,7 +22,6 @@ gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Name = "HubUI"
 gui.ResetOnSpawn = false
 gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
-
 --==================================================
 -- NOTIFICAÇÃO
 --==================================================
@@ -38,7 +35,6 @@ notify.TextSize = 14
 notify.Visible = false
 notify.TextWrapped = true
 Instance.new("UICorner", notify)
-
 local function notifyMsg(text)
     notify.Text = text
     notify.Visible = true
@@ -46,7 +42,6 @@ local function notifyMsg(text)
         notify.Visible = false
     end)
 end
-
 --==================================================
 -- HUB PRINCIPAL
 --==================================================
@@ -59,12 +54,10 @@ main.Active = true
 main.Draggable = true
 main.ZIndex = 10
 Instance.new("UICorner", main)
-
 local top = Instance.new("Frame", main)
 top.Size = UDim2.new(1,0,0,40)
 top.BackgroundColor3 = Color3.fromRGB(25,25,25)
 top.ZIndex = 11
-
 local title = Instance.new("TextLabel", top)
 title.Size = UDim2.new(1,0,1,0)
 title.Text = "Demon Hub"
@@ -72,12 +65,10 @@ title.Font = Enum.Font.GothamBold
 title.TextSize = 20
 title.TextColor3 = Color3.new(1,1,1)
 title.BackgroundTransparency = 1
-
 local content = Instance.new("Frame", main)
 content.Size = UDim2.new(1,-20,1,-55)
 content.Position = UDim2.new(0,10,0,45)
 content.BackgroundTransparency = 1
-
 --==================================================
 -- MENU LATERAL
 --==================================================
@@ -93,14 +84,12 @@ local function sideButton(text, y)
     Instance.new("UICorner", b)
     return b
 end
-
 local espBtn = sideButton("ESP",0)
 local playerBtn = sideButton("PLAYER",50)
 local tpBtn = sideButton("TELEPORT",100)
 local aboutBtn = sideButton("ABOUT",150)
 local othersBtn = sideButton("OTHERS",200)
 local buttons = {espBtn, playerBtn, tpBtn, aboutBtn, othersBtn}
-
 --==================================================
 -- PAINÉIS (COM SCROLL AUTOMÁTICO)
 --==================================================
@@ -126,13 +115,11 @@ local function panel()
     pad.PaddingRight = UDim.new(0, 20)
     return p
 end
-
 local espPanel = panel()
 local playerPanel = panel()
 local tpPanel = panel()
 local aboutPanel = panel()
 local othersPanel = panel()
-
 --==================================================
 -- FUNÇÃO SHOW PANEL
 --==================================================
@@ -148,7 +135,6 @@ local function showPanel(panelToShow, activeBtn)
     panelToShow.Visible = true
     activeBtn.BackgroundColor3 = BTN_ACTIVE
 end
-
 --==================================================
 -- LISTA DE PLAYERS CLICÁVEL
 --==================================================
@@ -160,10 +146,10 @@ local function createPlayerList(panel, textBox)
     listFrame.ScrollBarThickness = 6
     listFrame.BackgroundColor3 = Color3.fromRGB(50,50,50)
     Instance.new("UICorner", listFrame)
-    
+   
     local listLayout = Instance.new("UIListLayout", listFrame)
     listLayout.Padding = UDim.new(0,5)
-    
+   
     local function refreshList()
         for _, child in pairs(listFrame:GetChildren()) do
             if child:IsA("TextButton") then child:Destroy() end
@@ -178,7 +164,7 @@ local function createPlayerList(panel, textBox)
                 btn.TextColor3 = Color3.new(1,1,1)
                 btn.BackgroundColor3 = Color3.fromRGB(70,70,70)
                 Instance.new("UICorner", btn)
-                
+               
                 btn.MouseButton1Click:Connect(function()
                     textBox.Text = p.Name
                     notifyMsg("Selecionado: "..p.Name)
@@ -187,18 +173,16 @@ local function createPlayerList(panel, textBox)
         end
         listFrame.CanvasSize = UDim2.new(0,0,0,listLayout.AbsoluteContentSize.Y + 5)
     end
-    
+   
     Players.PlayerAdded:Connect(refreshList)
     Players.PlayerRemoving:Connect(refreshList)
     refreshList()
 end
-
 --==================================================
 -- ESP PLAYERS
 --==================================================
 local ESP_ON, ESP_NAME, ESP_DISTANCE, ESP_LINE = false, true, false, false
 local lines = {}
-
 local function espToggle(text, y, callback)
     local b = Instance.new("TextButton", espPanel)
     b.Size = UDim2.new(1, -40, 0, 45)
@@ -218,7 +202,6 @@ local function espToggle(text, y, callback)
         notifyMsg(text.." "..(callback() and "ON" or "OFF"))
     end)
 end
-
 espToggle("ESP",20,function(t) if t then ESP_ON = not ESP_ON end return ESP_ON end)
 espToggle("NOME",80,function(t) if t then ESP_NAME = not ESP_NAME end return ESP_NAME end)
 espToggle("DISTÂNCIA",140,function(t) if t then ESP_DISTANCE = not ESP_DISTANCE end return ESP_DISTANCE end)
@@ -232,7 +215,6 @@ espToggle("LINHA",200,function(t)
     end
     return ESP_LINE
 end)
-
 RunService.RenderStepped:Connect(function()
     for p,objs in pairs(lines) do
         if not p.Character or not p.Character:FindFirstChild("HumanoidRootPart") then
@@ -319,7 +301,6 @@ RunService.RenderStepped:Connect(function()
         end
     end
 end)
-
 --==================================================
 -- ESP MOEDAS
 --==================================================
@@ -331,10 +312,8 @@ tokenBtn.TextSize = 16
 tokenBtn.TextColor3 = Color3.new(1,1,1)
 tokenBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
 Instance.new("UICorner", tokenBtn)
-
 local ESP_TOKEN_ON = false
 local tokenHighlights = {}
-
 local function createTokenHighlight(obj)
     if tokenHighlights[obj] then return end
     local h = Instance.new("Highlight")
@@ -344,26 +323,22 @@ local function createTokenHighlight(obj)
     h.Parent = obj
     tokenHighlights[obj] = h
 end
-
 local function removeTokenHighlight(obj)
     if tokenHighlights[obj] then
         tokenHighlights[obj]:Destroy()
         tokenHighlights[obj] = nil
     end
 end
-
 workspace.DescendantAdded:Connect(function(obj)
     if ESP_TOKEN_ON and obj:IsA("BasePart") and obj.Name:match("Coin") then
         createTokenHighlight(obj)
     end
 end)
-
 workspace.DescendantRemoving:Connect(function(obj)
     if obj:IsA("BasePart") and obj.Name:match("Coin") then
         removeTokenHighlight(obj)
     end
 end)
-
 tokenBtn.MouseButton1Click:Connect(function()
     ESP_TOKEN_ON = not ESP_TOKEN_ON
     tokenBtn.Text = "ESP MOEDAS : "..(ESP_TOKEN_ON and "ON" or "OFF")
@@ -380,7 +355,6 @@ tokenBtn.MouseButton1Click:Connect(function()
         end
     end
 end)
-
 --==================================================
 -- PLAYER PANEL COMPLETO (GODMODE + NOCLIP + VAMPIRE FLY + SPEED + SUPERJUMP)
 --==================================================
@@ -390,15 +364,12 @@ local superJumpPower = 50
 local flySpeed = 50
 local FlyControl = {Forward=0, Backward=0, Left=0, Right=0, Up=0, Down=0}
 local bodyVelocity = nil
-
 -- ANIMAÇÃO VAMPIRE FLY (IDLE DO PACOTE VAMPIRE)
 local vampireFlyAnimId = "rbxassetid://1083445855" -- Idle 1 do Vampire Animation Pack
 local vampireFlyAnimTrack = nil
-
 local function getChar() return LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait() end
 local function getHumanoid() return getChar():WaitForChild("Humanoid") end
 local function getRootPart() return getChar():WaitForChild("HumanoidRootPart") end
-
 -- FUNÇÕES ANIMAÇÃO VAMPIRE FLY
 local function playVampireFly()
     local hum = getHumanoid()
@@ -414,7 +385,6 @@ local function playVampireFly()
     vampireFlyAnimTrack.Looped = true
     vampireFlyAnimTrack:Play()
 end
-
 local function stopVampireFly()
     if vampireFlyAnimTrack then
         vampireFlyAnimTrack:Stop()
@@ -422,7 +392,6 @@ local function stopVampireFly()
         vampireFlyAnimTrack = nil
     end
 end
-
 --==================================================
 -- CRIAÇÃO DE BOTÕES PLAYER
 --==================================================
@@ -438,11 +407,9 @@ local function createPlayerButton(parent, text, y)
     b.Text = text
     return b
 end
-
 local godBtn = createPlayerButton(playerPanel, "GODMODE : OFF", 10)
 local noclipBtn = createPlayerButton(playerPanel, "NOCLIP : OFF", 60)
 local flyBtn = createPlayerButton(playerPanel, "VAMPIRE FLY : OFF", 110)
-
 --==================================================
 -- ATUALIZA TEXTOS DOS BOTÕES
 --==================================================
@@ -452,7 +419,6 @@ local function updatePlayerTexts()
     flyBtn.Text = "VAMPIRE FLY : "..(isFlying and "ON" or "OFF")
 end
 updatePlayerTexts()
-
 --==================================================
 -- FUNÇÕES PLAYER
 --==================================================
@@ -464,29 +430,23 @@ local function applyGod()
         if GOD_ON then hum.Health = hum.MaxHealth end
     end)
 end
-
 local function toggleNoclip()
     NOCLIP_ON = not NOCLIP_ON
     updatePlayerTexts()
     notifyMsg("NOCLIP "..(NOCLIP_ON and "ON" or "OFF"))
 end
-
 local function startFly()
     if isFlying then return end
     isFlying = true
-
     bodyVelocity = Instance.new("BodyVelocity")
     bodyVelocity.MaxForce = Vector3.new(1e5,1e5,1e5)
     bodyVelocity.Velocity = Vector3.new(0,0,0)
     bodyVelocity.Parent = getRootPart()
-
     -- Toca animação Vampire ao voar
     playVampireFly()
-
     updatePlayerTexts()
     notifyMsg("VAMPIRE FLY ON")
 end
-
 local function stopFly()
     isFlying = false
     if bodyVelocity then
@@ -498,7 +458,6 @@ local function stopFly()
     updatePlayerTexts()
     notifyMsg("VAMPIRE FLY OFF")
 end
-
 --==================================================
 -- SLIDERS
 --==================================================
@@ -563,7 +522,6 @@ local function createSlider(name, minVal, maxVal, initial, callback)
     update(initial)
     return holder
 end
-
 createSlider("SPEED", 16, 200, speedValue, function(v)
     speedValue = v
     getHumanoid().WalkSpeed = v
@@ -575,7 +533,6 @@ end)
 createSlider("FLY SPEED", 10, 500, flySpeed, function(v)
     flySpeed = v
 end)
-
 --==================================================
 -- CONTROLE FLY / NOCLIP / VAMPIRE ANIMATION
 --==================================================
@@ -601,7 +558,6 @@ RunService.RenderStepped:Connect(function()
         bodyVelocity.Velocity = move*flySpeed
     end
 end)
-
 -- CONTROLES TECLA FLY (WASD + Space/Shift)
 UIS.InputBegan:Connect(function(input,gp)
     if gp then return end
@@ -612,7 +568,6 @@ UIS.InputBegan:Connect(function(input,gp)
     if input.KeyCode==Enum.KeyCode.Space then FlyControl.Up=1 end
     if input.KeyCode==Enum.KeyCode.LeftShift then FlyControl.Down=1 end
 end)
-
 UIS.InputEnded:Connect(function(input)
     if input.KeyCode==Enum.KeyCode.W then FlyControl.Forward=0 end
     if input.KeyCode==Enum.KeyCode.S then FlyControl.Backward=0 end
@@ -621,7 +576,6 @@ UIS.InputEnded:Connect(function(input)
     if input.KeyCode==Enum.KeyCode.Space then FlyControl.Up=0 end
     if input.KeyCode==Enum.KeyCode.LeftShift then FlyControl.Down=0 end
 end)
-
 --==================================================
 -- CONEXÕES BOTÕES PLAYER
 --==================================================
@@ -631,9 +585,7 @@ godBtn.MouseButton1Click:Connect(function()
     if GOD_ON then applyGod() end
     notifyMsg("GODMODE "..(GOD_ON and "ON" or "OFF"))
 end)
-
 noclipBtn.MouseButton1Click:Connect(toggleNoclip)
-
 flyBtn.MouseButton1Click:Connect(function()
     if isFlying then
         stopFly()
@@ -641,7 +593,6 @@ flyBtn.MouseButton1Click:Connect(function()
         startFly()
     end
 end)
-
 -- GODMODE + FLY NO RESPAWN
 LocalPlayer.CharacterAdded:Connect(function(char)
     char:WaitForChild("Humanoid")
@@ -656,7 +607,6 @@ LocalPlayer.CharacterAdded:Connect(function(char)
         playVampireFly()
     end
 end)
-
 --==================================================
 -- VARIÁVEIS GRUDAR
 --==================================================
@@ -667,14 +617,12 @@ local lastCFrame = nil
 local currentTargetName = nil
 local currentMode = nil
 local watchingChar = nil
-
 --==================================================
 -- FUNÇÕES GRUDAR (CORRIGIDO - COLO FICA DE FRENTE)
 --==================================================
 local function getChar(plr)
     return plr.Character or plr.CharacterAdded:Wait()
 end
-
 local function setNoCollide(char, state)
     for _, v in ipairs(char:GetDescendants()) do
         if v:IsA("BasePart") then
@@ -682,7 +630,6 @@ local function setNoCollide(char, state)
         end
     end
 end
-
 local function playSitAnimation(humanoid)
     if sitTrack then sitTrack:Stop() end
     local anim = Instance.new("Animation")
@@ -690,17 +637,14 @@ local function playSitAnimation(humanoid)
     sitTrack = humanoid:LoadAnimation(anim)
     sitTrack:Play()
 end
-
 local function cleanupAttach(restorePos)
     if alignPos then alignPos:Destroy() alignPos = nil end
     if alignOri then alignOri:Destroy() alignOri = nil end
     if attach0 then attach0:Destroy() attach0 = nil end
     if attach1 then attach1:Destroy() attach1 = nil end
-
     local char = getChar(LocalPlayer)
     local hum = char:FindFirstChild("Humanoid")
     local root = char:FindFirstChild("HumanoidRootPart")
-
     if hum then
         hum.Sit = false
         if sitTrack then
@@ -708,39 +652,29 @@ local function cleanupAttach(restorePos)
             sitTrack = nil
         end
     end
-
     setNoCollide(char, false)
-
     if restorePos and root and lastCFrame then
         root.CFrame = lastCFrame
     end
-
     currentTargetName = nil
     currentMode = nil
     if watchingChar then watchingChar:Disconnect() watchingChar = nil end
 end
-
 local function startAttach(playerName, mode)
     local target = Players:FindFirstChild(playerName)
     if not target or target == LocalPlayer then
         notifyMsg("Jogador inválido")
         return
     end
-
     cleanupAttach(false)
-
     currentTargetName = playerName
     currentMode = mode
-
     local myChar = getChar(LocalPlayer)
     local targetChar = getChar(target)
-
     local myRoot = myChar:WaitForChild("HumanoidRootPart")
     local targetRoot = targetChar:WaitForChild("HumanoidRootPart")
     local hum = myChar:WaitForChild("Humanoid")
-
     lastCFrame = myRoot.CFrame
-
     local offsetPos, offsetOri
     if mode == "back" then
         offsetPos = Vector3.new(0, 0, 1.6)
@@ -749,33 +683,27 @@ local function startAttach(playerName, mode)
         offsetPos = Vector3.new(0, 0, -1.6)
         offsetOri = Vector3.new(0, 180, 0) -- 180 graus = FICA DE FRENTE
     end
-
     setNoCollide(myChar, true)
     myRoot.CFrame = targetRoot.CFrame * CFrame.new(offsetPos) * CFrame.Angles(0, math.rad(offsetOri.Y), 0)
     task.wait(0.05)
-
     attach0 = Instance.new("Attachment", myRoot)
     attach1 = Instance.new("Attachment", targetRoot)
     attach1.Position = offsetPos
     attach0.Orientation = offsetOri
-
     alignPos = Instance.new("AlignPosition", myRoot)
     alignPos.Attachment0 = attach0
     alignPos.Attachment1 = attach1
     alignPos.RigidityEnabled = true
     alignPos.MaxForce = 100000
     alignPos.Responsiveness = 200
-
     alignOri = Instance.new("AlignOrientation", myRoot)
     alignOri.Attachment0 = attach0
     alignOri.Attachment1 = attach1
     alignOri.RigidityEnabled = true
     alignOri.MaxTorque = 100000
     alignOri.Responsiveness = 200
-
     hum.Sit = true
     playSitAnimation(hum)
-
     if watchingChar then watchingChar:Disconnect() end
     watchingChar = target.CharacterAdded:Connect(function()
         task.wait(0.2)
@@ -783,17 +711,14 @@ local function startAttach(playerName, mode)
             startAttach(currentTargetName, currentMode)
         end
     end)
-
     notifyMsg("Grudado em "..playerName.." ("..(mode == "back" and "Costas" or "Colo")..")")
 end
-
 Players.PlayerRemoving:Connect(function(plr)
     if plr.Name == currentTargetName then
         cleanupAttach(true)
         notifyMsg("Alvo saiu → voltou à posição anterior")
     end
 end)
-
 --==================================================
 -- TELEPORT PANEL
 --==================================================
@@ -807,7 +732,6 @@ tpBox.TextSize = 16
 tpBox.BackgroundColor3 = Color3.fromRGB(40,40,40)
 tpBox.TextColor3 = Color3.new(1,1,1)
 Instance.new("UICorner", tpBox)
-
 local tpGo = Instance.new("TextButton", tpPanel)
 tpGo.Size = UDim2.new(0,260,0,45)
 tpGo.Position = UDim2.new(0,20,0,75)
@@ -818,7 +742,6 @@ tpGo.TextSize = 16
 tpGo.TextColor3 = Color3.new(1,1,1)
 tpGo.BackgroundColor3 = Color3.fromRGB(70,120,255)
 Instance.new("UICorner", tpGo)
-
 local backBtn = Instance.new("TextButton", tpPanel)
 backBtn.Size = UDim2.new(0,260,0,45)
 backBtn.Position = UDim2.new(0,20,0,130)
@@ -829,7 +752,6 @@ backBtn.TextSize = 16
 backBtn.TextColor3 = Color3.new(1,1,1)
 backBtn.BackgroundColor3 = Color3.fromRGB(255,100,100)
 Instance.new("UICorner", backBtn)
-
 local lapBtn = Instance.new("TextButton", tpPanel)
 lapBtn.Size = UDim2.new(0,260,0,45)
 lapBtn.Position = UDim2.new(0,20,0,185)
@@ -840,7 +762,6 @@ lapBtn.TextSize = 16
 lapBtn.TextColor3 = Color3.new(1,1,1)
 lapBtn.BackgroundColor3 = Color3.fromRGB(100,200,255)
 Instance.new("UICorner", lapBtn)
-
 local stopBtn = Instance.new("TextButton", tpPanel)
 stopBtn.Size = UDim2.new(0,260,0,45)
 stopBtn.Position = UDim2.new(0,20,0,240)
@@ -851,9 +772,7 @@ stopBtn.TextSize = 16
 stopBtn.TextColor3 = Color3.new(1,1,1)
 stopBtn.BackgroundColor3 = Color3.fromRGB(200,50,50)
 Instance.new("UICorner", stopBtn)
-
 createPlayerList(tpPanel, tpBox)
-
 tpGo.MouseButton1Click:Connect(function()
     local t = Players:FindFirstChild(tpBox.Text)
     if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
@@ -863,7 +782,6 @@ tpGo.MouseButton1Click:Connect(function()
         notifyMsg("Player não encontrado")
     end
 end)
-
 backBtn.MouseButton1Click:Connect(function()
     if tpBox.Text ~= "" then
         startAttach(tpBox.Text, "back")
@@ -871,7 +789,6 @@ backBtn.MouseButton1Click:Connect(function()
         notifyMsg("Digite o nome do player")
     end
 end)
-
 lapBtn.MouseButton1Click:Connect(function()
     if tpBox.Text ~= "" then
         startAttach(tpBox.Text, "lap")
@@ -879,12 +796,10 @@ lapBtn.MouseButton1Click:Connect(function()
         notifyMsg("Digite o nome do player")
     end
 end)
-
 stopBtn.MouseButton1Click:Connect(function()
     cleanupAttach(false)
     notifyMsg("Desgrudado")
 end)
-
 --==================================================
 -- OTHERS (SPECTATE + LIBERAR EMOTES)
 --==================================================
@@ -898,7 +813,6 @@ otherBox.TextSize = 16
 otherBox.BackgroundColor3 = Color3.fromRGB(40,40,40)
 otherBox.TextColor3 = Color3.new(1,1,1)
 Instance.new("UICorner", otherBox)
-
 local spectateBtn = Instance.new("TextButton", othersPanel)
 spectateBtn.LayoutOrder = 2
 spectateBtn.Size = UDim2.new(0,260,0,45)
@@ -909,7 +823,6 @@ spectateBtn.TextSize = 16
 spectateBtn.TextColor3 = Color3.new(1,1,1)
 spectateBtn.BackgroundColor3 = Color3.fromRGB(70,120,255)
 Instance.new("UICorner", spectateBtn)
-
 -- BOTÃO LIBERAR EMOTES
 local emotesBtn = Instance.new("TextButton", othersPanel)
 emotesBtn.LayoutOrder = 3
@@ -921,13 +834,68 @@ emotesBtn.TextSize = 16
 emotesBtn.TextColor3 = Color3.new(1,1,1)
 emotesBtn.BackgroundColor3 = Color3.fromRGB(100,200,100)
 Instance.new("UICorner", emotesBtn)
-
+-- BOTÃO MUTE SONS
+local muteBtn = Instance.new("TextButton", othersPanel)
+muteBtn.LayoutOrder = 4
+muteBtn.Size = UDim2.new(0,260,0,45)
+muteBtn.Position = UDim2.new(0,20,0,185)
+muteBtn.Text = "MUTE SONS : OFF"
+muteBtn.Font = Enum.Font.GothamBold
+muteBtn.TextSize = 16
+muteBtn.TextColor3 = Color3.new(1,1,1)
+muteBtn.BackgroundColor3 = Color3.fromRGB(200,50,50)
+Instance.new("UICorner", muteBtn)
+local SoundService = game:GetService("SoundService")
+local isMuted = false
+local mutedSounds = {}
+local connection = nil
+local function muteGameSounds()
+    for _, obj in ipairs(game:GetDescendants()) do
+        if obj:IsA("Sound") and obj.Parent ~= LocalPlayer.Character then
+            if obj.Volume > 0 then
+                mutedSounds[obj] = obj.Volume
+                obj.Volume = 0
+            end
+        end
+    end
+    SoundService.Volume = 0
+end
+local function unmuteGameSounds()
+    for sound, originalVolume in pairs(mutedSounds) do
+        if sound and sound:IsA("Sound") then
+            sound.Volume = originalVolume
+        end
+    end
+    mutedSounds = {}
+    SoundService.Volume = 0.5
+end
+local function monitorNewSounds()
+    if connection then connection:Disconnect() end
+    connection = game.DescendantAdded:Connect(function(obj)
+        if isMuted and obj:IsA("Sound") and obj.Parent ~= LocalPlayer.Character then
+            obj.Volume = 0
+        end
+    end)
+end
+muteBtn.MouseButton1Click:Connect(function()
+    isMuted = not isMuted
+    if isMuted then
+        muteGameSounds()
+        monitorNewSounds()
+        muteBtn.Text = "MUTE SONS : ON"
+        notifyMsg("Sons do jogo silenciados")
+    else
+        unmuteGameSounds()
+        if connection then connection:Disconnect() connection = nil end
+        muteBtn.Text = "MUTE SONS : OFF"
+        notifyMsg("Sons do jogo ativados")
+    end
+end)
 local isSpectating = false
 local targetPlayer = nil
 local cam = workspace.CurrentCamera
 local originalCameraType = cam.CameraType
 local originalCameraSubject = cam.CameraSubject
-
 spectateBtn.MouseButton1Click:Connect(function()
     if not isSpectating then
         targetPlayer = Players:FindFirstChild(otherBox.Text)
@@ -947,13 +915,12 @@ spectateBtn.MouseButton1Click:Connect(function()
         notifyMsg("ESPECTAR DESATIVADO")
     end
 end)
-
 -- FUNCIONALIDADE LIBERAR EMOTES
 emotesBtn.MouseButton1Click:Connect(function()
     local success, err = pcall(function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/7yd7/Hub/refs/heads/Branch/GUIS/Emotes.lua"))()
     end)
-    
+   
     if success then
         notifyMsg("✅ EMOTES LIBERADOS!")
         emotesBtn.Text = "EMOTES ✓"
@@ -966,16 +933,13 @@ emotesBtn.MouseButton1Click:Connect(function()
         warn("Erro emotes:", err)
     end
 end)
-
 createPlayerList(othersPanel, otherBox)
-
 RunService.RenderStepped:Connect(function()
     if isSpectating and targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
         local hrp = targetPlayer.Character.HumanoidRootPart
         cam.CFrame = hrp.CFrame * CFrame.new(0,5,10) * CFrame.Angles(math.rad(-15),0,0)
     end
 end)
-
 --==================================================
 -- ABOUT
 --==================================================
@@ -988,7 +952,6 @@ aboutTitle.Font = Enum.Font.GothamBold
 aboutTitle.TextSize = 18
 aboutTitle.TextColor3 = Color3.new(1,1,1)
 aboutTitle.TextXAlignment = Enum.TextXAlignment.Left
-
 local creators = Instance.new("TextLabel", aboutPanel)
 creators.Size = UDim2.new(1,-40,0,60)
 creators.Position = UDim2.new(0,20,0,55)
@@ -999,7 +962,6 @@ creators.Font = Enum.Font.Gotham
 creators.TextSize = 15
 creators.TextColor3 = Color3.new(1,1,1)
 creators.Text = "CRIADORES:\n• B4_LORD\n• SZ RICK\n\n• VAMPIRE FLY ADDED\n• EMOTES LIBERADOS\n• COLO CORRIGIDO ✓"
-
 local donateBtn = Instance.new("TextButton", aboutPanel)
 donateBtn.Size = UDim2.new(0,260,0,45)
 donateBtn.Position = UDim2.new(0,20,0,130)
@@ -1009,7 +971,6 @@ donateBtn.TextSize = 16
 donateBtn.TextColor3 = Color3.new(1,1,1)
 donateBtn.BackgroundColor3 = Color3.fromRGB(60,160,90)
 Instance.new("UICorner", donateBtn)
-
 donateBtn.MouseButton1Click:Connect(function()
     local link = "https://www.youtube.com/"
     if syn and syn.openurl then
@@ -1025,7 +986,6 @@ donateBtn.MouseButton1Click:Connect(function()
         notifyMsg("COPIE O LINK MANUALMENTE")
     end
 end)
-
 --==================================================
 -- CONTROLES BOTÕES LATERAIS
 --==================================================
@@ -1035,7 +995,6 @@ tpBtn.MouseButton1Click:Connect(function() showPanel(tpPanel, tpBtn) end)
 aboutBtn.MouseButton1Click:Connect(function() showPanel(aboutPanel, aboutBtn) end)
 othersBtn.MouseButton1Click:Connect(function() showPanel(othersPanel, othersBtn) end)
 showPanel(espPanel, espBtn)
-
 --==================================================
 -- TECLA Z (ABRIR/FECHAR HUB)
 --==================================================
