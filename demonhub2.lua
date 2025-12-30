@@ -146,10 +146,10 @@ local function createPlayerList(panel, textBox)
     listFrame.ScrollBarThickness = 6
     listFrame.BackgroundColor3 = Color3.fromRGB(50,50,50)
     Instance.new("UICorner", listFrame)
-   
+  
     local listLayout = Instance.new("UIListLayout", listFrame)
     listLayout.Padding = UDim.new(0,5)
-   
+  
     local function refreshList()
         for _, child in pairs(listFrame:GetChildren()) do
             if child:IsA("TextButton") then child:Destroy() end
@@ -164,7 +164,7 @@ local function createPlayerList(panel, textBox)
                 btn.TextColor3 = Color3.new(1,1,1)
                 btn.BackgroundColor3 = Color3.fromRGB(70,70,70)
                 Instance.new("UICorner", btn)
-               
+              
                 btn.MouseButton1Click:Connect(function()
                     textBox.Text = p.Name
                     notifyMsg("Selecionado: "..p.Name)
@@ -173,7 +173,7 @@ local function createPlayerList(panel, textBox)
         end
         listFrame.CanvasSize = UDim2.new(0,0,0,listLayout.AbsoluteContentSize.Y + 5)
     end
-   
+  
     Players.PlayerAdded:Connect(refreshList)
     Players.PlayerRemoving:Connect(refreshList)
     refreshList()
@@ -839,12 +839,23 @@ local muteBtn = Instance.new("TextButton", othersPanel)
 muteBtn.LayoutOrder = 4
 muteBtn.Size = UDim2.new(0,260,0,45)
 muteBtn.Position = UDim2.new(0,20,0,185)
-muteBtn.Text = "MUTE SONS : OFF"
+muteBtn.Text = "ONLY MIC"
 muteBtn.Font = Enum.Font.GothamBold
 muteBtn.TextSize = 16
 muteBtn.TextColor3 = Color3.new(1,1,1)
 muteBtn.BackgroundColor3 = Color3.fromRGB(200,50,50)
 Instance.new("UICorner", muteBtn)
+-- BOTÃO PIANO TALENTS
+local pianoBtn = Instance.new("TextButton", othersPanel)
+pianoBtn.LayoutOrder = 5
+pianoBtn.Size = UDim2.new(0,260,0,45)
+pianoBtn.Position = UDim2.new(0,20,0,240)
+pianoBtn.Text = "PIANO TALENTS"
+pianoBtn.Font = Enum.Font.GothamBold
+pianoBtn.TextSize = 16
+pianoBtn.TextColor3 = Color3.new(1,1,1)
+pianoBtn.BackgroundColor3 = Color3.fromRGB(150,100,200)
+Instance.new("UICorner", pianoBtn)
 local SoundService = game:GetService("SoundService")
 local isMuted = false
 local mutedSounds = {}
@@ -882,12 +893,10 @@ muteBtn.MouseButton1Click:Connect(function()
     if isMuted then
         muteGameSounds()
         monitorNewSounds()
-        muteBtn.Text = "MUTE SONS : ON"
         notifyMsg("Sons do jogo silenciados")
     else
         unmuteGameSounds()
         if connection then connection:Disconnect() connection = nil end
-        muteBtn.Text = "MUTE SONS : OFF"
         notifyMsg("Sons do jogo ativados")
     end
 end)
@@ -920,7 +929,7 @@ emotesBtn.MouseButton1Click:Connect(function()
     local success, err = pcall(function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/7yd7/Hub/refs/heads/Branch/GUIS/Emotes.lua"))()
     end)
-   
+  
     if success then
         notifyMsg("✅ EMOTES LIBERADOS!")
         emotesBtn.Text = "EMOTES ✓"
@@ -931,6 +940,24 @@ emotesBtn.MouseButton1Click:Connect(function()
     else
         notifyMsg("❌ ERRO AO CARREGAR EMOTES")
         warn("Erro emotes:", err)
+    end
+end)
+-- FUNCIONALIDADE PIANO TALENTS
+pianoBtn.MouseButton1Click:Connect(function()
+    local success, err = pcall(function() 
+        loadstring(game:HttpGet("https://hellohellohell0.com/talentless-raw/TALENTLESS.lua", true))() 
+    end)
+  
+    if success then
+        notifyMsg("✅ O PIANO TALENTS FOI EXECUTADO!")
+        pianoBtn.Text = "PIANO TALENTS ✓"
+        pianoBtn.BackgroundColor3 = Color3.fromRGB(170,120,220)
+        task.wait(2)
+        pianoBtn.Text = "PIANO TALENTS"
+        pianoBtn.BackgroundColor3 = Color3.fromRGB(150,100,200)
+    else
+        notifyMsg("❌ ERRO AO CARREGAR PIANO TALENTS")
+        warn("Erro piano talents:", err)
     end
 end)
 createPlayerList(othersPanel, otherBox)
